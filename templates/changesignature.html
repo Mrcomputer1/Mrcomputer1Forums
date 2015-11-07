@@ -1,0 +1,15 @@
+{% include "header.html" %}
+
+<center>
+	<div class="box">
+		<h1>Change you about me</h1>
+		<form action="" method="post">
+		{% csrf_token %}
+		<textarea name="signature" class='biginput' style="height:290px;">{{ signature }}</textarea><br>
+		<input type="submit" value="Save changes" class='btn'>
+		</form>
+	</div>
+</center>
+
+
+{% include "footer.html" %}

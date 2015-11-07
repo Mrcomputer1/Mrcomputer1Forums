@@ -1,0 +1,9 @@
+{% include "header.html" %}
+
+<form action="" method="post">
+{% csrf_token %}
+<input type="text" name="topicid" class='input'>
+<input type="submit" value="Move" class='input'>
+</form>
+
+{% include "footer.html" %}

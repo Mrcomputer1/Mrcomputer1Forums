@@ -1,0 +1,36 @@
+{% include "header.html" %}
+
+{% if user.is_superuser %}
+<div class="adminbox">
+<a href="{{ forumsettings.SITE_ADMIN }}Forum/forum/1/" title="Edit forum"><span class="fa fawhite fa-cog"></span></a>
+</div>
+{% endif %}
+
+<h3>{{ forum.name }}</h3>
+{% if auth %}
+	<a href="../newtopic/{{ forum.id }}/">New topic</a>
+{% endif %}
+<br><br>
+<table border="0">
+	<thead>
+		<tr><td>Topic Name</td><td>Posted By</td></tr>
+	</thead>
+	<tbody>
+		{% for sticky in stickys %}
+			{% if sticky.closed == "c" %} 
+			<tr><td><a href="../topic/{{ sticky.id }}/" style="color:grey;"><span class="fa fa-thumb-tack"></span> <span class="fa fa-lock"></span> {{ sticky.name }}</a></td><td>{{ sticky.posted_by }}</td></tr>
+			{% else %}
+			<tr><td><a href="../topic/{{ sticky.id }}/"><span class="fa fa-thumb-tack"></span> {{ sticky.name }}</a></td><td>{{ sticky.posted_by }}</td></tr>
+			{% endif %}
+		{% endfor %}
+		{% for topic in topics %}
+			{% if topic.closed == "c" %} 
+			<tr><td><a href="../topic/{{ topic.id }}/" style="color:gray;"><span class="fa fa-lock"></span> {{ topic.name }}</a></td><td>{{ topic.posted_by }}</td></tr>
+			{% else %}
+			<tr><td><a href="../topic/{{ topic.id }}/">{{ topic.name }}</a></td><td>{{ topic.posted_by }}</td></tr>
+			{% endif %}
+		{% endfor %}
+	</tbody>
+</table>
+
+{% include "footer.html" %}

@@ -1,0 +1,14 @@
+{% include "header.html" %}
+
+<form action="" method="post">
+{% csrf_token %}
+<select name="forum" class='input'>
+	{% for forum in forums %}
+	<option value="{{ forum.id }}">{{ forum.section.name }}/{{ forum.name }}</option>
+	{% endfor %}
+</select>
+<input type="submit" value="Change" class='input'>
+
+<br><br>
+
+{% include "footer.html" %}

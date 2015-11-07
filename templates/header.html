@@ -1,0 +1,35 @@
+{% load staticfiles %}
+<html>
+	<head>
+		<title>{{ forumsettings.FORUM_NAME }}</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/Forum_Style.css" %}'>
+		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/Topic_Style.css" %}'>
+		<script src="http://cdn.wysibb.com/js/jquery.wysibb.min.js"></script>
+		<link rel="stylesheet" href="http://cdn.wysibb.com/css/default/wbbtheme.css" />
+		<script src='{% static "Mrcomputer1Forums/Topic_Script.js" %}'></script>
+		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/User_Style.css" %}'>
+		<script src='{% static "Mrcomputer1Forums/Scratch$.js" %}'></script>
+		<script src='{% static "Mrcomputer1Forums/User_ScratchR2_Verify.js" %}'></script>
+	</head>
+	<body>
+<header class="header">
+{% if auth %}
+	<a href="{{ forumsettings.FORUM_ROOT }}" class="headeritem">{{ forumsettings.FORUM_NAME }}</a>
+	<a href="{{ forumsettings.FORUM_ROOT }}user/{{ user.username }}"><span class="headerselecteditem">Welcome, {{ user.username }}!</span></a>
+	<a href="{{ forumsettings.FORUM_ROOT }}account/change_password/" class="headeritem">Change your password</a>
+	{% if user.is_staff %}
+	<a href="{{ forumsettings.SITE_ADMIN }}Forum/report/" class="headermoditem">View reports</a>
+	{% endif %}
+	{% if user.is_superuser %}
+	<a href="{{ forumsettings.SITE_ADMIN }}" class="headeradminitem">View admin</a>
+	{% endif %}
+	<a href="{{ forumsettings.FORUM_ROOT }}account/logout/" class="headeritem">Logout</a>
+{% else %}
+	<a href="{{ forumsettings.FORUM_ROOT }}" class="headeritem">{{ forumsettings.FORUM_NAME }}</a>
+	<span class="headerselecteditem">Welcome, Guest!</span>
+	<a href="{{ forumsettings.FORUM_ROOT }}account/register/" class="headeritem">Register</a>
+	<a href="{{ forumsettings.FORUM_ROOT }}account/login/" class="headeritem">Login</a>
+{% endif %}
+</header>

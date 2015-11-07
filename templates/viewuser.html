@@ -1,0 +1,83 @@
+{% include "header.html" %}
+
+<!--{{ pageuser.username }}
+<br>Rank:
+{% if pageuser.is_superuser %}
+<font color="red">Admin</font>
+{% elif pageuser.is_staff %}
+<font color="purple">Mod</font>
+{% else %}
+Member
+{% endif %}
+<br>
+<br>
+<h1>About Me</h1>
+{{ forumuser.signature }}
+<br>
+<a href="{{ forumsettings.FORUM_ROOT }}settings/{{ pageuser.username }}/">Change about me</a><br>
+{% if user.is_staff %}
+<a href="rank_change/">Change rank</a><br>
+<a href="manage_ban/">Manage ban</a><br>
+<a href="delete/">Delete user</a>
+{% endif %}
+<br>-->
+
+<div id="scratchtempobject" style='display:none'></div>
+
+<div class="user-header">
+		{% if pageuser.is_superuser %}
+		<font color="red">{{ pageuser.username }}</font>
+		<span class="user-rank-admin"><span class="fa fa-bolt"></span> ADMIN</span>
+		{% elif pageuser.is_staff %}
+		<font color="purple">{{ pageuser.username }}</font>
+		<span class="user-rank-mod"><span class="fa fa-book"></span> MOD</span>
+		{% else %}
+		{{ pageuser.username }}
+		{% endif %}
+</div>
+<table border="0" width="100%">
+	<tr>
+		<td width="70%">
+			<div class="user-box-header">
+				About Me
+			</div>
+			<div class="user-box-content">
+				{{ forumuser.signature }}
+				{% if pageuser.username == user.username or user.is_staff %}
+				<hr color="black">
+				<a href="{{ forumsettings.FORUM_ROOT}}settings/{{ pageuser.username }}/">Change about me</a>
+				{% endif %}
+			</div>
+			<!---->
+			<div class="user-box-header">
+				Details 
+			</div>
+			<div class="user-box-content">
+				Country: {{ forumuser.infolocation }}<br>
+				My Website: <a href="{{ forumuser.infowebsiteurl }}" target="_blank">{{ forumuser.infowebsitename}}</a><br>
+				<hr color="black">
+				{% if pageuser.username == user.username or user.is_staff %}
+				<a href="{{ forumsettings.FORUM_ROOT }}settings/{{ pageuser.username }}/details/">Change</a>
+				{% endif %}
+			</div>
+		</td>
+		<td width="30%">
+			
+			{% if user.is_staff %}
+			
+			<div class="user-box-header">
+				Admin
+			</div>
+			<div class="user-box-content">
+				<a href="rank_change/">Change rank</a><br>
+				<a href='manage_ban/'>Manage ban</a><br>
+				<a href='delete/'>Delete user</a>
+			</div>
+			<!---->
+			
+			{% endif %}
+		</td>
+	</tr>
+</table>
+
+{% include "footer.html" %}

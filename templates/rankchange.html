@@ -1,0 +1,13 @@
+{% include "header.html" %}
+
+<form action="" method="post">
+{% csrf_token %}
+<select name="rank" class='input'>
+<option value="a">Admin (Superuser) [Full Admin Access]</option>
+<option value="m">Mod (Staff) [Admin Access]</option>
+<option value="u">User</option>
+</select>
+<input type="submit" value="Update" class='input'>
+</form>
+
+{% include "footer.html" %}

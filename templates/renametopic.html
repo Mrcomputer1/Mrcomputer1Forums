@@ -1,0 +1,13 @@
+{% include "header.html" %}
+
+<center>
+	<div class="box">
+		<form action="" method="post">
+		{% csrf_token %}
+		<input type="text" name="name" value="{{ topicname }}" class='biginput'>
+		<input type="submit" value="Rename topic" class='btn'>
+		</form>
+	</div>
+</center>
+
+{% include "footer.html" %}

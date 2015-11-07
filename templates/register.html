@@ -1,0 +1,16 @@
+{% include "header.html" %}
+
+<center>
+	<div class="box">
+		<h1>Sign Up</h1>
+		<form action="" method="post">
+		{% csrf_token %}
+		<input type="text" name="user" placeholder="Username" class='biginput'>
+		<input type="hidden" name="email" value="noEmailSet@example.com"><!--You may set your email if you want with Inspect Element!-->
+		<input type="password" name="pass" placeholder="Password" class='biginput'><br>
+		<input type="submit" value="Sign Up" class='btn'>
+		</form>
+	</div>
+</center>
+
+{% include "footer.html" %}

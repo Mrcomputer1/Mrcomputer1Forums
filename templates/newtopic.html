@@ -1,0 +1,15 @@
+{% include "header.html" %}
+
+<center>
+	<div class="bigbox">
+		<h1>Create new topic</h1>
+		<form action="" method="post">
+		{% csrf_token %}
+		<input type="text" name="name" placeholder="Subject" class='biginput'><br>
+		<textarea name="content" id="editornoclick" style="height:290px"></textarea><br>
+		<input type="submit" value="Post new topic" class='btn'>
+		</form>
+	</div>
+</center>
+
+{% include "footer.html" %}

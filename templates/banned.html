@@ -1,0 +1,9 @@
+{% include "header.html" %}
+
+Oops! I looks like you are banned!<br>
+The admin or mod that banned you left this message:<br>
+<span style="background-color:lightgrey">{{ ban_msg }}</span>
+<br>
+You can appeal this ban by going <a href="{{ forumsettings.FORUM_ROOT }}banappeal/">here</a><br>
+
+{% include "footer.html" %}

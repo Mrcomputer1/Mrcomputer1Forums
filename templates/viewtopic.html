@@ -1,0 +1,111 @@
+{% include "header.html" %}
+{% load bbcode %}
+
+<!--{% if user.is_staff %}
+<div class="adminbox">
+	{% if user.is_superuser %}<a href='{{ forumsettings.SITE_ADMIN }}Forum/topic/{{ topics.id }}' title='Edit topic in Django Admin'><span class="fa fawhite fa-cog"></span></a>{% endif %} <a href='open_close/c/' title='Close topic'><span class="fa fawhite fa-lock"></span></a> <a href="open_close/o/" title='Open topic'><span class="fa fawhite fa-unlock"></span></a> <a href="delete/" title='Delete topic'><span class="fa fawhite fa-delete-o"></span></a> <a href="move_topic/" title='Move topic'><span class="fa fawhite fa-arrow-circle-o-right"></span></a> <a href="rename_topic/" title='Rename topic'><span class="fa fawhite fa-edit"></span></a> <a href="stick_unstick/s/"><span class="fa fawhite fa-thumb-tack"></span></a> <a href="stick_unstick/u/"><del><span class="fa fawhite fa-thumb-tack"></span></del></a>
+</div>
+{% endif %}
+
+<h3>{{ topics.name }}</h3>
+	{% for post in posts %}
+		By <a href="{{ forumsettings.FORUM_ROOT}}user/{{ post.poster }}/">{% if post.rank == "a" %}[Admin]{% elif post.rank == "m" %}[Mod]{% endif %}{{ post.poster }}</a><br>
+		<div class="content">{{ post.content|parse }}</div><br>
+		{% if auth %}<a href="{{ forumsettings.FORUM_ROOT}}action/report/{{ post.id }}/">Report</a> | {% if user.username == post.poster or user.is_staff%}<a href="{{ forumsettings.FORUM_ROOT}}post/{{ post.id }}/edit/">Edit</a>{% endif %} | {% if user.is_staff %}<a href="{{ forumsettings.FORUM_ROOT}}post/{{ post.id }}/delete/">Delete</a> | <a href="{{ forumsettings.FORUM_ROOT}}post/{{ post.id }}/move_post/">Move Post</a>{% endif %}{% endif %}
+		<hr>
+	{% endfor %}
+<hr>
+{% if user.is_staff %}
+<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/open_close/c/">Close topic</a> | <a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/open_close/o/">Open topic</a><br>
+<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/stick_unstick/s/">Make sticky topic</a> | <a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/stick_unstick/u/">Remove sticky topic</a><br>
+<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/delete/">Delete topic</a> | <a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/move_topic/">Move topic</a> | <a href="{{ forumsettings.FORUM_ROOT }}topic/{{ topics.id }}/rename_topic/">Rename topic</a><br>
+{% endif %}
+
+{% if auth and topics.closed == Copen %}
+<form action="" method="post">
+{% csrf_token %}
+<textarea name="content" class="input"></textarea>
+<input type="submit" value="Save" class="input">
+</form>
+{% endif %}-->
+
+<!---->
+
+<div id="mbbpopup" style="display:none">
+</div>
+
+{% if user.is_staff %}
+<div class="adminbox">
+	{% if user.is_superuser %}<a href='{{ forumsettings.SITE_ADMIN }}Forum/topic/{{ topics.id }}' title='Edit topic in Django Admin'><span class="fa fawhite fa-cog"></span></a>{% endif %} <a href='open_close/c/' title='Close topic'><span class="fa fawhite fa-lock"></span></a> <a href="open_close/o/" title='Open topic'><span class="fa fawhite fa-unlock"></span></a> <a href="delete/" title='Delete topic'><span class="fa fawhite fa-delete-o"></span></a> <a href="move_topic/" title='Move topic'><span class="fa fawhite fa-arrow-circle-o-right"></span></a> <a href="rename_topic/" title='Rename topic'><span class="fa fawhite fa-edit"></span></a> <a href="stick_unstick/s/"><span class="fa fawhite fa-thumb-tack"></span></a> <a href="stick_unstick/u/"><del><span class="fa fawhite fa-thumb-tack"></span></del></a>
+</div>
+{% endif %}
+
+<h3><a href="{{ forumsettings.FORUM_ROOT }}">Forums Home</a> » <a href="{{ forumsettings.FORUM_ROOT }}{{ topics.forum.id }}">{{ topics.forum.name }}</a> » {{ topics.name}}</h3>
+	{% for post in posts %}
+		{% if post.rank == "a" or post.rank == "m" %}
+			<div class="post-header-admin" id="post-{{ post.id }}">
+		{% else %}
+			<div class="post-header" id="post-{{ post.id }}">
+		{% endif %}
+		<a href="{{ forumsettings.FORUM_ROOT }}user/{{ post.poster }}" {% if post.rank == "a" %}style="color:red"{% elif post.rank == "m" %}style="color:purple"{% endif %}>{{ post.poster }}</a>
+		{% if post.rank == "a" %}
+			<span class="fa fa-bolt" style="color:red" title="Administrator"></span>
+		{% elif post.rank == "m" %}
+			<span class="fa fa-book" style="color:purple" title="Moderator"></span>
+		{% endif %}
+		</div>
+		
+		{% if post.rank == "a" or post.rank == "m" %}
+			<div class="post-content-admin">
+		{% else %}
+			<div class="post-content">
+		{% endif %}
+		{{ post.content|parse }}
+		</div>
+		
+		{% if post.rank == "a" or post.rank == "m" %}
+			<div class="post-footer-admin">
+		{% else %}
+			<div class="post-footer">
+		{% endif %}
+		{% if auth %}
+		<a href="{{ forumsettings.FORUM_ROOT }}action/report/{{ post.id }}/"><span class="fa fa-exclamation-circle"></span> Report</a>&nbsp;
+		<a href="#editor" class="quotebtn" postid="{{ post.id }}"><span class="fa fa-quote-right"></span> Quote</a>&nbsp;
+		{% endif %}
+		{% if user.is_staff %}
+		<a href="{{ forumsettings.FORUM_ROOT }}post/{{ post.id }}/edit/"><span class="fa fa-pencil"></span> Edit</a>&nbsp;
+		<a href="{{ forumsettings.FORUM_ROOT }}post/{{ post.id }}/delete/"><span class="fa fa-trash"></span> Delete</a>&nbsp;
+		<a href="{{ forumsettings.FORUM_ROOT }}post/{{ post.id }}/movepost/"><span class="fa fa-arrow-circle-right"></span> Move</a>&nbsp;
+		{% endif %}
+		<a href="#" class="showlink" postid="{{ post.id }}" forumroot="{{ forumsettings.FORUM_ROOT }}"><span class="fa fa-link"></span> Link</span></a>
+		</div>
+		<br><br>
+	{% endfor %}
+	
+	{% if auth and topics.closed == Copen %}
+		<div>
+			<form action="" method="post">
+				{% csrf_token %}
+				<textarea id="editor" name="content" placeholder="Click here to reply" class="post-reply"></textarea>
+				<br><br>
+				<input type="submit" class="btn" value="Reply">
+			</form>
+		</div>
+	{% elif topics.closed == Cclose %}
+		<font color="red">Sorry, This topic is not open to replies!</font><br><br>
+	{% else %}
+		<font color="red">Sorry, You must be logged in to reply!</font><br><br>
+	{% endif %}
+		
+	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/open_close/c/"><span class="fa fa-lock"></span> Close topic</a> | 
+	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/open_close/o/"><span class="fa fa-unlock"></span> Open topic</a>
+	<br>
+	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/stick_unstick/s/"><span class="fa fa-thumb-tack"></span> Make sticky topic</a> | 
+	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/stick_unstick/u/"><span class="fa fa-thumb-tack"></span> Remove sticky topic</a>
+	<br>
+	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/delete/"><span class="fa fa-trash"></span> Delete topic</a> | 
+	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/move_topic/"><span class="fa fa-arrow-circle-right"></span> Move topic</a> | 
+	<a href="{{ forumsettings.FORUM_ROOT }}topic/{{ topics.id }}/rename_topic/"><span class="fa fa-pencil"></span> Rename topic</a>
+	<br>
+
+{% include "footer.html" %}

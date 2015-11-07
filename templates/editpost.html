@@ -1,0 +1,13 @@
+{% include "header.html" %}
+
+<center>
+	<div class="box">
+		<form action="" method="post">
+		{% csrf_token %}
+		<textarea name="content" id="editornoclick" style="height:290px;">{{ content }}</textarea><br>
+		<input type="submit" value="Update post" class='btn'>
+		</form>
+	</div>
+</center>
+
+{% include "footer.html" %}

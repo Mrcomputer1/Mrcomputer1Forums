@@ -1,0 +1,29 @@
+{% include "header.html" %}
+
+{% if user.is_superuser %}
+<div class="adminbox">
+<a href="{{ forumsettings.SITE_ADMIN }}Forum/" title="Forum Admin"><span class="fa fa-cog fawhite"></span></a>
+</div>
+{% endif %}
+
+{% if sections %}
+	<table border="0">
+		<thead>
+			<tr><td>Section Name</td> <td>Fourm Name</td> <td>Forum Info</td></tr>
+		</thead>
+		<tbody>
+			{% for section in sections %}
+				{% if not section.id == forumsettings.STAFF_SECTION or user.is_staff %}
+				<tr><td>{{ section.name }}</td> <td></td> <td></td></tr>
+				{% for forum in forums %}
+					{% if forum.section == section %}
+					<tr><td></td> <td><a href="{{ forum.id }}/">{{ forum.name }}</a></td> <td>{{ forum.info }}</td></tr>
+					{% endif %}
+				{% endfor %}
+				{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}
+
+{% include "footer.html" %}

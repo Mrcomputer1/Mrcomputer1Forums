@@ -1,0 +1,128 @@
+.header{
+	background-color:blue;
+	color:white;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:50px;
+}
+.headeritem{
+	color:white;
+	padding-top:15px;
+	padding-right:20px;
+	padding-left:20px;
+	padding-bottom:15px;
+	display:inline-block;
+}
+.headerselecteditem{
+	color:white;
+	padding-top:15px;
+	padding-right:20px;
+	padding-left:20px;
+	padding-bottom:15px;
+	display:inline-block;
+	background-color:darkblue;
+}
+.headeradminitem{
+	color:white;
+	padding-top:15px;
+	padding-right:20px;
+	padding-left:20px;
+	padding-bottom:15px;
+	display:inline-block;
+	background-color:red;
+}
+.headermoditem{
+	color:white;
+	padding-top:15px;
+	padding-right:20px;
+	padding-left:20px;
+	padding-bottom:15px;
+	display:inline-block;
+	background-color:purple;
+}
+.headeradminitem:hover,.headermoditem:hover{
+	color:white;
+}
+.headeritem:hover{
+	color:white;
+	background-color:darkblue;
+}
+a{
+	color:blue;
+	text-decoration:none;
+}
+a:hover{
+	color:blue;
+	text-decoration:underline;
+}
+body{
+	padding-top:55px;
+}
+table,tr,td{
+	border-width:2px;
+	border-color:blue;
+	padding:4px 4px 4px 4px;
+}
+.input{
+	border-radius:5px;
+	border-color:black;
+}
+.biginput{
+	/* Based on http://elementalcode.herokuapp.com/accounts/register CSS (.form-input) */
+	width:100%;
+	padding:12px;
+	font-size:16px;
+	line-height:18px;
+	border-radius:7px;
+	background-color: white;
+	border: 1px solid grey;
+	color: black;
+	margin-bottom:5px;
+	resize: vertical;
+}
+.box{
+	width:500px;
+}
+.bigbox{
+	width:80%;
+}
+.btn{
+	/* Based on http://elementalcode.herokuapp.com/accounts/register CSS (.submit-button) */
+	padding:12px;
+	font-size:23px;
+	border-radius: 5px;
+	color: white;
+	background-color:blue;
+	border: none;
+	transition: background 0.1s ease-out 0s;
+}
+.btn:hover{
+	background-color:darkblue;
+}
+.btn:active{
+	background-color:darkblue;
+}
+.progressbar{
+	border-radius: 5px;
+	width:100%;
+	font-size:23px;
+	padding:12px;
+	margin-bottom:5px;
+}
+.adminbox{
+	background-color:blue;
+	color:white;
+	position:fixed;
+	bottom:5;
+	right:5;
+	padding:3px 3px 3px 3px;
+}
+.fawhite{
+	color:white;
+}
+.content{
+	max-width:500px;
+	word-wrap: break-word;
+}

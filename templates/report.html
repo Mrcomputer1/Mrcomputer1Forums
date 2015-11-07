@@ -1,0 +1,9 @@
+{% include "header.html" %}
+
+<form action="" method="post">
+{% csrf_token %}
+<textarea name="message" class='input'></textarea><br>
+<input type="submit" value="Report" class='input'>
+</form>
+
+{% include "footer.html" %}

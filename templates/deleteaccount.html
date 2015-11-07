@@ -1,0 +1,12 @@
+{% include "header.html" %}
+
+<h1>Delete my account</h1>
+<font color="red">WARNING: Once you request your account to be deleted you won't be able to login any more</font><br>
+<b>NOTE: Your topics and posts won't be deleted!</b><br>
+<form action="" method="post">
+{% csrf_token %}
+<textarea name="reason" cols="100" rows="20" class="input"></textarea><br>
+<input type="submit" value="Delete account!" class="input">
+</form>
+
+{% include "footer.html" %}

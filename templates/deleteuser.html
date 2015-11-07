@@ -1,0 +1,8 @@
+{% include "header.html" %}
+
+<h1>Delete {{ target.username }}</h1>
+There is no way to undo this! You should NEVER delete an account unless it is yours or the user requested it!<br>
+If you want to prevent this user from logging in again try <a href="../manage_ban/">banning</a>
+<form action="" method="post">{% csrf_token %}<input type="submit" value="Delete this account!" class="input"></form>
+
+{% include "footer.html" %}

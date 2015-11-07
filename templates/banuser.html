@@ -1,0 +1,14 @@
+{% include "header.html" %}
+
+Not Banned: {{ banned }}
+<form action="" method="post">
+{% csrf_token %}
+<select name="banned" class='input'>
+<option value="yes">Banned</option>
+<option value="no">Unbanned</option></select><br>
+<textarea name="msg" class='input'>{{ banmessage }}</textarea><br>
+<input type="submit" value="Ban/Unban" class='input'>
+</select>
+</form>
+
+{% include "footer.html" %}

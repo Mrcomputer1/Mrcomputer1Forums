@@ -1,0 +1,86 @@
+.post-header{
+	width:90%;
+	padding:13px;
+	font-size:20px;
+	border-top-right-radius:7px;
+	border-top-left-radius:7px;
+	border-bottom-right-radius:0px;
+	border-bottom-left-radius:0px;
+	background-color:lightgrey;
+	border: 1px solid grey;
+	color: black;
+}
+.post-header-admin{
+	width:90%;
+	padding:13px;
+	font-size:20px;
+	border-top-right-radius:7px;
+	border-top-left-radius:7px;
+	border-bottom-right-radius:0px;
+	border-bottom-left-radius:0px;
+	background-color:rgb(143,206,255);
+	border: 1px solid blue;
+	color: black;
+}
+
+.post-content{
+	width:90%;
+	padding: 13px;
+	border: 1px solid grey;
+	color: black;
+	max-width:90%;
+	word-wrap: break-word;
+}
+.post-content-admin{
+	width:90%;
+	padding: 13px;
+	border: 1px solid blue;
+	border-top: 0px;
+	border-bottom:0px;
+	color: black;
+	max-width:90%;
+	word-wrap: break-word;
+}
+
+.post-footer{
+	width:90%;
+	padding:13px;
+	border-top-right-radius:0px;
+	border-top-left-radius:0px;
+	border-bottom-right-radius:7px;
+	border-bottom-left-radius:7px;
+	background-color:lightgrey;
+	border: 1px solid grey;
+	color: black;
+}
+.post-footer-admin{
+	width:90%;
+	padding:13px;
+	border-top-right-radius:0px;
+	border-top-left-radius:0px;
+	border-bottom-right-radius:7px;
+	border-bottom-left-radius:7px;
+	background-color:rgb(143,206,255);
+	border: 1px solid blue;
+	color: black;
+}
+
+.post-reply{
+	/* Based on http://elementalcode.herokuapp.com/accounts/register CSS (.form-input) */
+	width:100%;
+	padding:12px;
+	font-size:16px;
+	line-height:18px;
+	background-color: white;
+	border: 1px solid grey;
+	color: black;
+	margin-bottom:5px;
+	resize: none;
+}
+
+.post-quote{
+	padding:15px;
+	width:90%;
+	border: 1px solid black;
+	border-left: 5px solid black;
+}
