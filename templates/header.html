@@ -12,6 +12,7 @@
 		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/User_Style.css" %}'>
 		<script src='{% static "Mrcomputer1Forums/Scratch$.js" %}'></script>
 		<script src='{% static "Mrcomputer1Forums/User_ScratchR2_Verify.js" %}'></script>
+		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/Alert_Style.css" %}'>
 	</head>
 	<body>
 <header class="header">
@@ -33,3 +34,9 @@
 	<a href="{{ forumsettings.FORUM_ROOT }}account/login/" class="headeritem">Login</a>
 {% endif %}
 </header>
+
+{% if messages %}
+	{% for message in messages %}
+	<div{% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</div>
+	{% endfor %}
+{% endif %}

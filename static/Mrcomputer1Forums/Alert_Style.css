@@ -1,0 +1,20 @@
+.alert{
+	border: 1px solid black;
+	border-radius: 5px;
+}
+.alert-info{
+	background-color:blue;
+	color: white;
+}
+.alert-success{
+	background-color:lime;
+	color: black;
+}
+.alert-warning{
+	background-color:orange;
+	color:black;
+}
+.alert-error{
+	background-color:red;
+	color:black;
+}

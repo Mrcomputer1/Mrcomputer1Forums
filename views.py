@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.template import RequestContext, loader
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from datetime import datetime
@@ -44,6 +45,7 @@ def topiclist(request, forum_id):
 
 def logouttask(request):
     logout(request)
+    messages.success(request, "You have been logged out! Goodbye!", fail_silently=True)
     return redirect(FORUM_SETTINGS['FORUM_ROOT'])
 
 def loginaccount(request):
@@ -52,7 +54,8 @@ def loginaccount(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "?notice=1")
+                messages.success(request, 'You have been logged in as ' + user.username + "!", fail_silently=True)
+                return redirect(FORUM_SETTINGS['FORUM_ROOT'])
             else:
                 template = loader.get_template("banned.html")
                 context = RequestContext(request, {
@@ -63,6 +66,7 @@ def loginaccount(request):
                 })
                 return HttpResponse(template.render(context))
         else:
+            messages.error(request, "Invalid username or password", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "account/login/") 
     
     template = loader.get_template("login.html")
@@ -82,7 +86,8 @@ def registeraccount(request):
         u.save()
         forumuser = ForumUser(username=request.POST['user'], scratchverify=False, ban_message='', signature='No about me set', user=u, rank='u')
         forumuser.save()
-        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "account/login/?notice=2")
+        messages.success(request, "Account created! You can now log in below", fail_silently=True)
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "account/login/")
     
     template = loader.get_template("register.html")
     context = RequestContext(request, {
@@ -102,6 +107,7 @@ def changesignature(request, username):
         fu = ForumUser.objects.get(username=username)
         fu.signature = request.POST['signature']
         fu.save()
+        messages.success(request, "About me updated!", fail_silently=True)
         return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "settings/" + username + "/")
 
     template = loader.get_template("changesignature.html")
@@ -136,7 +142,8 @@ def newtopic(request, forum_id):
             t.save()
             p = Post(topic=t, content=request.POST['content'], rank=rank, poster=request.user.username, post_date=datetime.now())
             p.save()
-            return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(t.id) + "/?notice=3")
+            messages.success(request, "Created topic!", fail_silently=True)
+            return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(t.id) + "/")
         
         template = loader.get_template("newtopic.html")
         context = RequestContext(request, {
@@ -196,6 +203,7 @@ def deletepost(request, post_id):
                 return redirect(FORUM_SETTINGS['FORUM_ROOT'])
             p.topic = t
             p.save()
+        messages.success(request, "Post deleted!", fail_silently=True)
         return redirect(FORUM_SETTINGS['FORUM_ROOT'])
     else:
         raise PermissionDenied
@@ -213,6 +221,7 @@ def deletetopic(request, topic_id):
                 return redirect(FORUM_SETTINGS['FORUM_ROOT'])
             t.forum = f
             t.save()
+            messages.success(request, "Topic deleted!", fail_silently=True)
         return redirect(FORUM_SETTINGS['FORUM_ROOT'])
     else:
         raise PermissionDenied
@@ -223,10 +232,12 @@ def openclosetopic(request, topic_id, open_close):
             t = Topic.objects.get(pk=topic_id)
             t.closed = "o"
             t.save()
+            messages.success(request, "Topic opened!", fail_silently=True)
         elif open_close == "c":
             t = Topic.objects.get(pk=topic_id)
             t.closed = "c"
             t.save()
+            messages.success(request, "Topic closed!", fail_silently=True)
         else:
             raise SyntaxError("Please pick a vaild action! O for open, C for close")
         return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(topic_id) + "/")
@@ -238,6 +249,7 @@ def movetopic(request, topic_id):
             t = Topic.objects.get(pk=topic_id)
             t.forum = Forum.objects.get(pk=request.POST['forum'])
             t.save()
+            messages.success(request, "Topic moved!", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(topic_id) + "/")
         
         template = loader.get_template("movetopic.html")
@@ -257,6 +269,7 @@ def movepost(request, post_id):
             p = Post.objects.get(pk=post_id)
             p.topic = Topic.objects.get(pk=request.POST['topicid'])
             p.save()
+            messages.success(request, "Post moved!", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "post/" + str(post_id) + "/")
 
         template = loader.get_template("movepost.html")
@@ -275,6 +288,7 @@ def editpost(request, post_id):
             p = Post.objects.get(pk=post_id)
             p.content = request.POST['content']
             p.save()
+            messages.success(request, "Updated post!", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "post/" + str(post_id) + "/")
 
         template = loader.get_template("editpost.html")
@@ -302,6 +316,7 @@ def changepassword(request):
             if u is not None:
                  u.set_password(request.POST['password'])
                  u.save()
+                 messages.success(request, "Password changed", fail_silently=True)
                  return redirect(FORUM_SETTINGS['FORUM_ROOT'])
             #else:
                 #return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "account/changepassword/")
@@ -324,6 +339,7 @@ def report(request, post_id):
         if request.user.is_authenticated():
             r = Report(reporter=request.user.username, reported=Post.objects.get(pk=post_id), report_message=request.POST['message'], report_status="o", report_date=datetime.now())
             r.save()
+            message.success(request, "Post reported! Thanks for the report", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "post/" + str(post_id) + "/")
         else:
             raise PermissionDenied
@@ -346,6 +362,7 @@ def renametopic(request, topic_id):
                 t = Topic.objects.get(pk=topic_id)
                 t.name = request.POST['name']
                 t.save()
+                messages.success(request, "Renamed topic!", fail_silently=True)
                 return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(topic_id) + "/")
             else:
                 raise PermissionDenied
@@ -390,10 +407,12 @@ def banuser(request, username):
                 f.ban_message = request.POST['msg']
                 u.save()
                 f.save()
+                messages.warning(request, "User " + u.username + " has been banned for: " + f.ban_message, fail_silently=True)
             else:
                 u = User.objects.get(username=username)
                 u.is_active = True
                 u.save()
+                messages.warning(request, "User " + u.username + " has been unbanned", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "user/" + username + "/")
         else:
             raise PermissionDenied
@@ -418,6 +437,7 @@ def banappeal(request):
             if not u.is_active:
                 f = ForumUser.objects.get(user=u)
                 if FORUM_SETTINGS['APPEAL_FORUM'] == -1:
+                    messages.error(request, "Sorry, this forum does not accept ban appeals", fail_silently=True)
                     raise PermissionDenied
                 else:
                     forum = Forum.objects.get(pk=FORUM_SETTINGS['APPEAL_FORUM'])
@@ -425,6 +445,7 @@ def banappeal(request):
                 t.save()
                 p = Post(topic=t,content=request.POST['msg'],poster=u.username,post_date=datetime.now())
                 p.save()
+                messages.success(request, "Appealed!", fail_silently=True)
                 return redirect(FORUM_SETTINGS['FORUM_ROOT'])
 
     template = loader.get_template("banappeal.html")
@@ -453,6 +474,7 @@ def changerank(request, username):
                 u.is_staff = False
                 u.is_superuser = False
                 u.save()
+            messages.success(request, "Rank updated!", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'])
         else:
             raise PermissionDenied
@@ -511,10 +533,12 @@ def sticktopic(request, topic_id, stick_unstick):
             t = Topic.objects.get(pk=topic_id)
             t.sticky = "y"
             t.save()
+            messages.success(request, "Made sticky!", fail_silently=True)
         elif stick_unstick == "u":
             t = Topic.objects.get(pk=topic_id)
             t.sticky = "n"
             t.save()
+            messages.success(request, "Removed sticky!", fail_silently=True)
         else:
             raise SyntaxError("Please pick a vaild action! S for stick, U for unstick")
         return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(topic_id) + "/")
@@ -532,6 +556,7 @@ def deleteaccount(request):
             u.save()
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "account/account_deleted/")
         else:
+            messages.warning(request, "Feature not complete!", fail_silently=True)
             template = loader.get_template("deleteaccount.html")
             context = RequestContext(request, {
                 'user': request.user,
@@ -555,6 +580,7 @@ def accountdeleted(request):
 def admindelete(request, username):
     if request.method == "POST" and request.user.is_superuser:
         User.objects.get(username=username).delete()
+        messages.warning(request, "Account deleted!", fail_silently=True)
         return redirect(FORUM_SETTINGS['FORUM_ROOT'])
     template = loader.get_template("deleteuser.html")
     context = RequestContext(request, {
@@ -587,6 +613,7 @@ def settingsdetails(request, username):
             f.infowebsiteurl = request.POST['websiteurl']
             f.infowebsitename = request.POST['websitename']
             f.save()
+            messages.success(request, "Updated!", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "user/" + username + "/")
         else:
             raise PermissionDenied
