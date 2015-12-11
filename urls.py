@@ -65,4 +65,12 @@ urlpatterns = [
     url(r'^post/(?P<post_id>[0-9]+)/json/$', views.postasjson, name='postjson'),
     # /settings/*/details/
     url(r'^settings/(?P<username>[a-zA-Z0-9\-_]+)/details/$', views.settingsdetails, name='settingsdetails'),
+    # /messages/
+    url(r'^messages/$', views.messagesview, name='messages'),
+    # /messages/delete_message/#/
+    url(r'^messages/delete_messages/(?P<msg_id>[0-9]+)/$', views.deletemsg, name='deletemessage'),
+    # /user/*/send_admin_message/
+    url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/send_admin_message/$', views.sendmsg, name='sendmsg'),
+    # /topic/#/followservice/
+    url(r'^topic/(?P<topic_id>[0-9]+)/followservice/$', views.followunfollow, name='followunfollow'),
 ]

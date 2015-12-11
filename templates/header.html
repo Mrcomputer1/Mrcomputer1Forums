@@ -20,6 +20,7 @@
 	<a href="{{ forumsettings.FORUM_ROOT }}" class="headeritem">{{ forumsettings.FORUM_NAME }}</a>
 	<a href="{{ forumsettings.FORUM_ROOT }}user/{{ user.username }}"><span class="headerselecteditem">Welcome, {{ user.username }}!</span></a>
 	<a href="{{ forumsettings.FORUM_ROOT }}account/change_password/" class="headeritem">Change your password</a>
+	<a href="{{ forumsettings.FORUM_ROOT }}messages/" class="headeritem">Your messages</a>
 	{% if user.is_staff %}
 	<a href="{{ forumsettings.SITE_ADMIN }}Forum/report/" class="headermoditem">View reports</a>
 	{% endif %}

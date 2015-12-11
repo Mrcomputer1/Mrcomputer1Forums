@@ -10,7 +10,7 @@ class PostInline(admin.StackedInline):
 class ForumUserAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': [
-            'username', 'ban_message', 'signature', 'user', 'rank'
+            'username', 'ban_message', 'signature', 'user', 'rank', 'scratchverify'
         ]}),
     ]
 
@@ -44,8 +44,16 @@ class ReportAdmin(admin.ModelAdmin):
         ]}),
     ]
 
+class MessageAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': [
+            'admin_message', 'content', 'user', 'date',
+        ]})
+    ]
+
 admin.site.register(ForumUser, ForumUserAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(Forum, ForumAdmin)
 admin.site.register(Topic, TopicAdmin)
 admin.site.register(Report, ReportAdmin)
+admin.site.register(Message, MessageAdmin)

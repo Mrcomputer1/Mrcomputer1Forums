@@ -5,11 +5,11 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import Http404
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from datetime import datetime
 from .models import *
 from .forum_settings import *
-import json
+import json, hashlib
 from django.utils import timezone
 
 # Create your views here.
@@ -174,6 +174,9 @@ def viewtopic(request, topic_id):
             t = Topic.objects.get(pk=topic_id)
             t.last_post_date = timezone.now()
             t.save()
+            for ft in FollowedTopic.objects.filter(topic=t):
+                msg = Message(admin_message=False, content='New posts in [url](link)' + FORUM_SETTINGS['FORUM_ROOT'] + 'post/' + str(p.id) + '/(/link)' + t.name + '[/url]' , user=ft.user, date=datetime.now())
+                msg.save()
 
         t = Topic.objects.get(pk=topic_id)
         template = loader.get_template("viewtopic.html")
@@ -620,12 +623,70 @@ def settingsdetails(request, username):
 
     template = loader.get_template("changedetails.html")
     context = RequestContext(request, {
-        'user': request.user.username,
+        'user': request.user,
         'auth': request.user.is_authenticated(),
         'forumsettings': FORUM_SETTINGS,
         'forumuser': ForumUser.objects.get(username=username),
     })
     if request.user.is_authenticated():
         return HttpResponse(template.render(context))
+    else:
+        raise PermissionDenied
+
+def messagesview(request):
+    template = loader.get_template("messages.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'sentmessages': Message.objects.filter(user=request.user).order_by("-date"),
+    })
+    if request.user.is_authenticated():
+        return HttpResponse(template.render(context))
+    else:
+        raise PermissionDenied
+
+def deletemsg(request, msg_id):
+    msg = Message.objects.get(pk=msg_id)
+    msg.delete()
+    messages.success(request, "Message deleted", fail_silently=True)
+    return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "messages/")
+
+def sendmsg(request, username):
+    if request.method == "POST":
+        if request.user.is_staff:
+            msg = Message(admin_message=True, content=request.POST['content'], user=User.objects.get(username=username), date=datetime.now())
+            msg.save()
+            messages.success(request, "Message sent", fail_silently=True)
+            return redirect(FORUM_SETTINGS['FORUM_ROOT'])
+        else:
+            raise PermissionDenied
+
+    template = loader.get_template("sendalert.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+    })
+    if request.user.is_authenticated() and request.user.is_staff:
+        return HttpResponse(template.render(context))
+    else:
+        raise PermissionDenied
+
+def followunfollow(request, topic_id):
+    topic = topic_id
+    if request.user.is_authenticated():
+        try:
+            user = request.user
+            follow = FollowedTopic.objects.get(user=user, topic=Topic.objects.get(pk=topic))
+            follow.delete()
+            messages.success(request, "Topic unfollowed", fail_silently=True)
+            return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + topic + "/")
+        except ObjectDoesNotExist:
+            user = request.user
+            follow = FollowedTopic(user = user, topic = Topic.objects.get(pk=topic))
+            follow.save()
+            messages.success(request, "Topic followed", fail_silently=True)
+            return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + topic + "/")
     else:
         raise PermissionDenied

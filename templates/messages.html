@@ -1,0 +1,18 @@
+{% include "header.html" %}
+{% load bbcode %}
+
+{% if sentmessages %}
+	<ul>
+		{% for message in sentmessages %}
+			{% if message.admin_message %}
+				<li><b title="#{{ message.id }}">ALERT:</b> {{ message.content|parse }} <b><a href="{{ forumsettings.FORUM_ROOT }}messages/delete_messages/{{ message.id }}">(X)</a></b></li>
+			{% else %}
+				<li>{{ message.content|parse }} <b><a href="{{ forumsettings.FORUM_ROOT }}messages/delete_messages/{{ message.id }}">(X)</a></b></li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+{% else %}
+<b>You have no messages</b>
+{% endif %}
+
+{% include "footer.html" %}

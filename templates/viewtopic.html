@@ -96,7 +96,10 @@
 	{% else %}
 		<font color="red">Sorry, You must be logged in to reply!</font><br><br>
 	{% endif %}
-		
+	
+	<a href='{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/followservice/'>Follow/Unfollow this topic</a>
+	<br>
+	{% if user.is_staff %}
 	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/open_close/c/"><span class="fa fa-lock"></span> Close topic</a> | 
 	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/open_close/o/"><span class="fa fa-unlock"></span> Open topic</a>
 	<br>
@@ -107,5 +110,6 @@
 	<a href="{{ forumsettings.FORUM_ROOT}}topic/{{ topics.id }}/move_topic/"><span class="fa fa-arrow-circle-right"></span> Move topic</a> | 
 	<a href="{{ forumsettings.FORUM_ROOT }}topic/{{ topics.id }}/rename_topic/"><span class="fa fa-pencil"></span> Rename topic</a>
 	<br>
+	{% endif %}
 
 {% include "footer.html" %}

@@ -10,7 +10,6 @@ class ForumUser(models.Model):
     signature = models.TextField()
     user = models.ForeignKey(User)
     rank = models.CharField(max_length=1) # u = User, m = Mod, a = Admin
-    scratchverify = models.BooleanField()
     infolocation = models.CharField(max_length=100)
     infowebsiteurl = models.CharField(max_length=500)
     infowebsitename = models.CharField(max_length=100)
@@ -69,4 +68,12 @@ class Report(models.Model):
     report_status = models.CharField(max_length=1)
     report_date = models.DateTimeField()
 
+class Message(models.Model):
+    admin_message = models.BooleanField()
+    content = models.TextField()
+    user = models.ForeignKey(User)
+    date = models.DateTimeField()
 
+class FollowedTopic(models.Model):
+    user = models.ForeignKey(User)
+    topic = models.ForeignKey(Topic)
