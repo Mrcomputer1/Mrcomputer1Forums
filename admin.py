@@ -10,7 +10,7 @@ class PostInline(admin.StackedInline):
 class ForumUserAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': [
-            'username', 'ban_message', 'signature', 'user', 'rank', 'scratchverify'
+            'username', 'ban_message', 'signature', 'user', 'rank'
         ]}),
     ]
 

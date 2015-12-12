@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from . import views
+from . import api_views
 
 urlpatterns = [
     # /
@@ -73,4 +74,31 @@ urlpatterns = [
     url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/send_admin_message/$', views.sendmsg, name='sendmsg'),
     # /topic/#/followservice/
     url(r'^topic/(?P<topic_id>[0-9]+)/followservice/$', views.followunfollow, name='followunfollow'),
+
+    ####################
+    ##### API      #####
+    ####################
+    #No Version
+
+    # /api/ - API
+    url(r'^api/$', api_views.api),
+
+    ####
+    #v1#
+    ####
+    
+    # /api/v1/ - API Info
+    url(r'^api/v1/$', api_views.v1),
+
+    # /api/v1/info/ - Forum Info
+    url(r'^api/v1/info/$', api_views.v1_info),
+
+    # /api/v1/user/:user - Get a user
+    url(r'^api/v1/user/(?P<username>[a-zA-Z0-9\-_]+)/$', api_views.v1_user_username),
+
+    # /api/v1/post/:postid - Get a post
+    url(r'^api/v1/post/(?P<post_id>[0-9]+)/$', api_views.v1_post),
+
+    # /api/v1/topic/:topicid - Get a topic
+    url(r'^api/v1/topic/(?P<topic_id>[0-9]+)/$', api_views.v1_topic),
 ]
