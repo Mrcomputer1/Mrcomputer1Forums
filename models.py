@@ -70,6 +70,7 @@ class Report(models.Model):
 
 class Message(models.Model):
     admin_message = models.BooleanField()
+    removed = models.BooleanField()
     content = models.TextField()
     user = models.ForeignKey(User)
     date = models.DateTimeField()

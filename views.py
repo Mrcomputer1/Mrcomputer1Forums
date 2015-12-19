@@ -175,7 +175,7 @@ def viewtopic(request, topic_id):
             t.last_post_date = timezone.now()
             t.save()
             for ft in FollowedTopic.objects.filter(topic=t):
-                msg = Message(admin_message=False, content='New posts in [url](link)' + FORUM_SETTINGS['FORUM_ROOT'] + 'post/' + str(p.id) + '/(/link)' + t.name + '[/url]' , user=ft.user, date=datetime.now())
+                msg = Message(removed=False, admin_message=False, content='New posts in [url](link)' + FORUM_SETTINGS['FORUM_ROOT'] + 'post/' + str(p.id) + '/(/link)' + t.name + '[/url]' , user=ft.user, date=datetime.now())
                 msg.save()
 
         t = Topic.objects.get(pk=topic_id)
@@ -648,14 +648,18 @@ def messagesview(request):
 
 def deletemsg(request, msg_id):
     msg = Message.objects.get(pk=msg_id)
-    msg.delete()
+    if msg.admin_message:
+        msg.removed = True
+        msg.save()
+    else:
+        msg.delete()
     messages.success(request, "Message deleted", fail_silently=True)
     return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "messages/")
 
 def sendmsg(request, username):
     if request.method == "POST":
         if request.user.is_staff:
-            msg = Message(admin_message=True, content=request.POST['content'], user=User.objects.get(username=username), date=datetime.now())
+            msg = Message(removed=False, admin_message=True, content=request.POST['content'], user=User.objects.get(username=username), date=datetime.now())
             msg.save()
             messages.success(request, "Message sent", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'])
@@ -690,3 +694,38 @@ def followunfollow(request, topic_id):
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + topic + "/")
     else:
         raise PermissionDenied
+
+def adminmessages(request, username):
+    if request.user.is_staff:
+        template = loader.get_template("reviewadminmessages.html")
+        context = RequestContext(request, {
+            'user': request.user,
+            'auth': request.user.is_authenticated(),
+            'forumsettings': FORUM_SETTINGS,
+            'sentmessages': Message.objects.filter(user=User.objects.get(username=username)).order_by('-date'),
+        })
+        return HttpResponse(template.render(context))
+    else:
+        raise PermissionDenied
+
+def deleteadminmsg(request, username, mid):
+    if request.user.is_staff:
+        m = Message.objects.get(pk=mid)
+        m.delete()
+        messages.success(request, "Deleted admin message", fail_silently=True)
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "user/" + username + "/admin_messages/")
+    else:
+        raise PermissionDenied
+    
+def viewposts(request, username):
+    # Links to this page are not shown to normal users but normal users can
+    # see this page
+    template = loader.get_template("viewpostlist.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'posts': Post.objects.filter(poster=username).order_by('-post_date'),
+    })
+    messages.info(request, "Post count: " + str(Post.objects.filter(poster=username).count()), fail_silently=True)
+    return HttpResponse(template.render(context))

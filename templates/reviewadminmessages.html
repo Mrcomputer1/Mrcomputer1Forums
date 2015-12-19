@@ -1,0 +1,16 @@
+{% include "header.html" %}
+{% load bbcode %}
+
+<ul>
+{% for message in sentmessages %}
+	{% if message.admin_message %}
+		{% if message.removed %}
+			<li><b>User has read this admin message: </b>{{ message.content|parse }} <a href='delete/{{ message.id }}/'>(Remove)</a></li>
+		{% else %}
+			<li>{{ message.content|parse }} <a href='delete/{{ message.id }}/'>(Remove)</a></li>
+		{% endif %}
+	{% endif %}
+{% endfor %}
+</ul>
+
+{% include "footer.html" %}

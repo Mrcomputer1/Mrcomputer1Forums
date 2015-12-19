@@ -5,7 +5,11 @@
 	<ul>
 		{% for message in sentmessages %}
 			{% if message.admin_message %}
-				<li><b title="#{{ message.id }}">ALERT:</b> {{ message.content|parse }} <b><a href="{{ forumsettings.FORUM_ROOT }}messages/delete_messages/{{ message.id }}">(X)</a></b></li>
+				{% if message.removed %}
+					<li title="#{{ message.id }}">ALERT: {{ message.content|parse }}</li>
+				{% else %}
+					<li><b title="#{{ message.id }}">ALERT:</b> {{ message.content|parse }} <b><a href="{{ forumsettings.FORUM_ROOT }}messages/delete_messages/{{ message.id }}">(X)</a></b></li>
+				{% endif %}
 			{% else %}
 				<li>{{ message.content|parse }} <b><a href="{{ forumsettings.FORUM_ROOT }}messages/delete_messages/{{ message.id }}">(X)</a></b></li>
 			{% endif %}

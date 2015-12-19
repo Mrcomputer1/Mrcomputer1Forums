@@ -74,7 +74,13 @@ urlpatterns = [
     url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/send_admin_message/$', views.sendmsg, name='sendmsg'),
     # /topic/#/followservice/
     url(r'^topic/(?P<topic_id>[0-9]+)/followservice/$', views.followunfollow, name='followunfollow'),
-
+    # /user/*/admin_messages/
+    url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/admin_messages/$', views.adminmessages),
+    # /user/*/admin_messages/delete/#
+    url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/admin_messages/delete/(?P<mid>[0-9]+)/$', views.deleteadminmsg),
+    # /user/*/view_posts/
+    url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/view_posts/$', views.viewposts),
+    
     ####################
     ##### API      #####
     ####################
