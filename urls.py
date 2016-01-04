@@ -80,6 +80,10 @@ urlpatterns = [
     url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/admin_messages/delete/(?P<mid>[0-9]+)/$', views.deleteadminmsg),
     # /user/*/view_posts/
     url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/view_posts/$', views.viewposts),
+    # /install/
+    url(r'^install/$', views.install),
+    # /install/complete/
+    url(r'^install/complete/', views.installComplete),
     
     ####################
     ##### API      #####

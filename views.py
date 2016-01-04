@@ -84,7 +84,7 @@ def registeraccount(request):
     if request.method == "POST":
         u = User.objects.create_user(request.POST['user'], request.POST['email'], request.POST['pass'])
         u.save()
-        forumuser = ForumUser(username=request.POST['user'], scratchverify=False, ban_message='', signature='No about me set', user=u, rank='u')
+        forumuser = ForumUser(username=request.POST['user'], ban_message='', signature='No about me set', user=u, rank='u')
         forumuser.save()
         messages.success(request, "Account created! You can now log in below", fail_silently=True)
         return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "account/login/")
@@ -728,4 +728,33 @@ def viewposts(request, username):
         'posts': Post.objects.filter(poster=username).order_by('-post_date'),
     })
     messages.info(request, "Post count: " + str(Post.objects.filter(poster=username).count()), fail_silently=True)
+    return HttpResponse(template.render(context))
+
+def install(request):
+    if not User.objects.count() == 0:
+        raise Http404("Already installed!")
+    if request.method == "POST":
+        u = User.objects.create_user(request.POST['user'], 'noEmailSet@example.org', request.POST['pass'])
+        u.is_staff = True
+        u.is_superuser = True
+        u.save()
+        forumuser = ForumUser(username=request.POST['user'], ban_message='', signature='No about me set', user=u, rank='a')
+        forumuser.save()
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "install/complete/")
+
+    template = loader.get_template("install.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+    })
+    return HttpResponse(template.render(context))
+
+def installComplete(request):
+    template = loader.get_template("installed.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+    })
     return HttpResponse(template.render(context))

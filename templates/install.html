@@ -1,0 +1,19 @@
+{% include "header.html" %}
+
+<h1>Welcome to Mrcomputer1 Forums Installer</h1>
+To install provide a username and password below!<br>
+You could also install manually!<br>
+To install manually:<br>
+<ol>
+	<li>Run manage.py createsuperuser and enter your username, email and password! (You don't need email)</li>
+	<li>Login and go to the admin panel and create a fourm user object for your user (Use "a" for rank)</li>
+</ol>
+<b>COMING SOON: Config options in database not in forum_settings.py!</b>
+<form action='' method='post'>
+	{% csrf_token %}
+	<input type='text' name='user' placeholder='Username'>
+	<input type='password' name='pass' placeholder='Password'>
+	<input type='submit' value='Install Now!'>
+</form>
+
+{% include "footer.html" %}
