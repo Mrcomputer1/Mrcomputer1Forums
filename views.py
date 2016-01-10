@@ -758,3 +758,26 @@ def installComplete(request):
         'forumsettings': FORUM_SETTINGS,
     })
     return HttpResponse(template.render(context))
+
+def deletealluserposts(request, username):
+    if request.method == "POST":
+        if request.user.is_staff or request.user.is_superuser:
+            p = Post.objects.filter(poster=username)
+            for post in p:
+                post.delete()
+            messages.success(request, 'All posts have been deleted', fail_silently=True)
+            return redirect(FORUM_SETTINGS['FORUM_ROOT'])
+        else:
+            raise PermissionDenied
+    else:
+        template = loader.get_template("deleteallposts.html")
+        context = RequestContext(request, {
+            'user': request.user,
+            'auth': request.user.is_authenticated(),
+            'forumsettings': FORUM_SETTINGS,
+            'username': username,
+        })
+        if request.user.is_staff or request.user.is_superuser:
+            return HttpResponse(template.render(context))
+        else:
+            raise PermissionDenied

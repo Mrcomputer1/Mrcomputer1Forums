@@ -1,4 +1,4 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from .models import *
 from .forum_settings import *
@@ -51,10 +51,29 @@ def v1_post(request, post_id):
 def v1_topic(request, topic_id):
     try:
         t = Topic.objects.get(pk=topic_id)
+        p = Post.objects.filter(topic=t).order_by("-post_date")
+        mainpost = Post.objects.filter(topic=t).order_by("post_date")[0]
+        pr = []
+        for post in p:
+            pr.append(post.id)
         r = {"forum": t.forum.id, "name": t.name, "posted_by": t.posted_by,
-             "closed": t.closed, "sticky": t.sticky}
+             "closed": t.closed, "sticky": t.sticky, "posts": pr, "mainpost": mainpost.id}
         return HttpResponse(json.dumps(r))
     except ObjectDoesNotExist:
         r = {"failed": True, "http": ["404", "Not Found"],
              "human": "This topic was not found"}
+        return HttpResponse(json.dumps(r))
+
+def v1_forum(request, forum_id):
+    try:
+        f = Forum.objects.get(pk=forum_id)
+        t = Topic.objects.filter(forum=f).order_by("-post_date")
+        tr = []
+        for topic in t:
+            tr.append(topic.id)
+        r = {"section": f.section.name, "name": f.name, "info": f.info, "topics": tr}
+        return HttpResponse(json.dumps(r))
+    except ObjectDoesNotExist:
+        r = {"failed": True, "http": ["404", "Not Found"],
+             "human": "This forum was not found"}
         return HttpResponse(json.dumps(r))
