@@ -1,3 +1,3 @@
 # Mrcomputer1Forums
 This is my forum system
-<b>test</b>
+<b style='color:lime'>test</b>
