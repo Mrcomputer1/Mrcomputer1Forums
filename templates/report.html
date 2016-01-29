@@ -1,9 +1,16 @@
 {% include "header.html" %}
 
-<form action="" method="post">
+<!--<form action="" method="post">
 {% csrf_token %}
 <textarea name="message" class='input'></textarea><br>
 <input type="submit" value="Report" class='input'>
+</form>-->
+
+<form action="" method="post">
+	<h2>Report this post</h2>
+	{% csrf_token %}
+	<textarea name="message" class='input'></textarea><br>
+	<input type="submit" value="Report" class="input">
 </form>
 
 {% include "footer.html" %}

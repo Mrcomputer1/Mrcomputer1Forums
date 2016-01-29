@@ -6,7 +6,7 @@
 </div>
 {% endif %}
 
-{% if sections %}
+<!--{% if sections %}
 	<table border="0">
 		<thead>
 			<tr><td>Section Name</td> <td>Fourm Name</td> <td>Forum Info</td></tr>
@@ -24,6 +24,27 @@
 			{% endfor %}
 		</tbody>
 	</table>
-{% endif %}
+{% endif %}-->
+{% for section in sections %}
+	{% if not section.id == forumsettings.STAFF_SECTION or user.is_staff %}
+		<div class='forum-box-head'>
+			<font size="6"><b>{{ section.name }}</b></font>
+		</div>
+		<div class='forum-box-content'>
+			<table border="0" class="forumlist">
+				<thead class='forumlisthead'>
+					<tr><td>Forum</td><td>Description</td></tr>
+				</thead>
+				<tbody class='forumlistbody'>
+					{% for forum in forums %}
+						{% if forum.section == section %}
+							<tr><td><a href="{{ forum.id }}/">{{ forum.name }}</a></td> <td>{{ forum.info }}</td></tr>
+						{% endif %}
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	{% endif %}
+{% endfor %}
 
 {% include "footer.html" %}

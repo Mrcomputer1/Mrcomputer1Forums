@@ -6,14 +6,21 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import Http404
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.core.paginator import Paginator, InvalidPage
 from datetime import datetime
 from .models import *
 from .forum_settings import *
-import json, hashlib
+import json, hashlib, math
 from django.utils import timezone
 
+def prepare(request):
+    if request.user.is_authenticated():
+        FORUM_SETTINGS['MSG_COUNT_'] = Message.objects.filter(user=request.user).count()
+    else:
+        FORUM_SETTINGS['MSG_COUNT_'] = -1
 # Create your views here.
 def forumlist(request):
+    prepare(request)
     template = loader.get_template("index.html")
     context = RequestContext(request, {
         'auth': request.user.is_authenticated(),
@@ -25,16 +32,34 @@ def forumlist(request):
     return HttpResponse(template.render(context))
 
 def topiclist(request, forum_id):
+    prepare(request)
     try:
         f = Forum.objects.get(pk=forum_id)
+        topics = Topic.objects.filter(forum=f).filter(sticky="n").order_by("-last_post_date")
+        topics2 = Paginator(topics, 25)
+        pagenum = 1
+        if 'page' in request.GET:
+            pagenum = request.GET['page']
+        try:
+            page = topics2.page(pagenum)
+        except InvalidPage:
+            pagenum = 1
+            page = topics2.page(pagenum)
+            messages.error(request, "Requested page not found", fail_silently=True)
         template = loader.get_template("topics.html")
         context = RequestContext(request, {
             'auth': request.user.is_authenticated(),
             'user': request.user,
             'forum': f,
-            'topics': Topic.objects.filter(forum=f).filter(sticky="n").order_by("-last_post_date"), #Topic.objects.order_by('-post_date')
+            'topics': page.object_list, #Topic.objects.order_by('-post_date')
             'forumsettings': FORUM_SETTINGS,
             'stickys': Topic.objects.filter(forum=f).filter(sticky="y").order_by("-last_post_date"),
+            'currentpage': int(pagenum),
+            'hasnextpage': page.has_next(),
+            'hasprevpage': page.has_previous(),
+            'range': topics2.page_range,
+            'nextpage': int(pagenum) + 1,
+            'prevpage': int(pagenum) - 1
         })
         if Forum.objects.get(pk=forum_id).section.id == FORUM_SETTINGS['STAFF_SECTION'] and not request.user.is_staff:
             raise PermissionDenied
@@ -44,11 +69,13 @@ def topiclist(request, forum_id):
         raise Http404("Forum not found")
 
 def logouttask(request):
+    prepare(request)
     logout(request)
     messages.success(request, "You have been logged out! Goodbye!", fail_silently=True)
     return redirect(FORUM_SETTINGS['FORUM_ROOT'])
 
 def loginaccount(request):
+    prepare(request)
     if request.method == "POST":
         user = authenticate(username=request.POST['user'], password=request.POST['pass'])
         if user is not None:
@@ -81,6 +108,7 @@ def loginaccount(request):
         return HttpResponse(template.render(context))
 
 def registeraccount(request):
+    prepare(request)
     if request.method == "POST":
         u = User.objects.create_user(request.POST['user'], request.POST['email'], request.POST['pass'])
         u.save()
@@ -101,6 +129,7 @@ def registeraccount(request):
         return HttpResponse(template.render(context))
 
 def changesignature(request, username):
+    prepare(request)
     if request.method == "POST":
         if not username == request.user.username and not request.user.is_staff:
             raise PermissionDenied
@@ -127,6 +156,7 @@ def changesignature(request, username):
         raise PermissionDenied
     
 def newtopic(request, forum_id):
+    prepare(request)
     try:
         if request.method == "POST":
             if forum_id == FORUM_SETTINGS['NEWS_FORUM'] and not request.user.is_staff:
@@ -161,6 +191,7 @@ def newtopic(request, forum_id):
         raise Http404("Forum not found")
 
 def viewtopic(request, topic_id):
+    prepare(request)
     try:
         if request.method == "POST":
             if request.user.is_superuser:
@@ -177,23 +208,45 @@ def viewtopic(request, topic_id):
             for ft in FollowedTopic.objects.filter(topic=t):
                 msg = Message(removed=False, admin_message=False, content='New posts in [url](link)' + FORUM_SETTINGS['FORUM_ROOT'] + 'post/' + str(p.id) + '/(/link)' + t.name + '[/url]' , user=ft.user, date=datetime.now())
                 msg.save()
-
+            posts = Post.objects.filter(topic=t).order_by("post_date")
+            posts2 = Paginator(posts, 10)
+            return redirect("/topic/" + str(t.id) + "/?page=" + str(posts2.num_pages) + "#post-" + str(p.id))
+        
         t = Topic.objects.get(pk=topic_id)
+        posts = Post.objects.filter(topic=t).order_by("post_date")
+        posts2 = Paginator(posts, 10)
+        pagenum = 1
+        if 'page' in request.GET:
+            pagenum = request.GET["page"]
+        try:
+            page = posts2.page(pagenum)
+        except InvalidPage:
+            messages.error(request, "Requested page not found", fail_silently=True)
+            pagenum = 1
+            page = posts2.page(pagenum)
+        
         template = loader.get_template("viewtopic.html")
         context = RequestContext(request, {
             'auth': request.user.is_authenticated(),
             'user': request.user,
             'forumsettings': FORUM_SETTINGS,
             'topics': t,
-            'posts': Post.objects.filter(topic=t).order_by("post_date"), #Post.objects.order_by('post_date')
+            'posts': page.object_list, #Post.objects.order_by('post_date')
             'Copen': "o",
             'Cclose': "c",
+            'range': posts2.page_range,
+            'currentpage': int(pagenum),
+            'hasnextpage': page.has_next,
+            'hasprevpage': page.has_previous(),
+            'nextpage': int(pagenum) + 1,
+            'prevpage': int(pagenum) - 1
         })
         return HttpResponse(template.render(context))
     except Topic.DoesNotExist:
         raise Http404("Topic not found")
 
 def deletepost(request, post_id):
+    prepare(request)
     if request.user.is_staff:
         if FORUM_SETTINGS['BIN_TOPIC'] == -1:
             p = Post.objects.get(pk=post_id)
@@ -212,6 +265,7 @@ def deletepost(request, post_id):
         raise PermissionDenied
 
 def deletetopic(request, topic_id):
+    prepare(request)
     if request.user.is_staff:
         if FORUM_SETTINGS['BIN_FORUM'] == -1:
             t = Topic.objects.get(pk=topic_id)
@@ -230,6 +284,7 @@ def deletetopic(request, topic_id):
         raise PermissionDenied
 
 def openclosetopic(request, topic_id, open_close):
+    prepare(request)
     if request.user.is_staff:
         if open_close == "o":
             t = Topic.objects.get(pk=topic_id)
@@ -247,6 +302,7 @@ def openclosetopic(request, topic_id, open_close):
     else:
         raise PermissionDenied
 def movetopic(request, topic_id):
+    prepare(request)
     if request.user.is_staff:
         if request.method == "POST":
             t = Topic.objects.get(pk=topic_id)
@@ -267,6 +323,7 @@ def movetopic(request, topic_id):
         raise PermissionDenied
 
 def movepost(request, post_id):
+    prepare(request)
     if request.user.is_staff:
         if request.method == "POST":
             p = Post.objects.get(pk=post_id)
@@ -286,6 +343,7 @@ def movepost(request, post_id):
         raise PermissionDenied
 
 def editpost(request, post_id):
+    prepare(request)
     if request.user.is_staff or Post.objects.get(pk=post_id).poster == request.user.username:
         if request.method == "POST":
             p = Post.objects.get(pk=post_id)
@@ -306,13 +364,17 @@ def editpost(request, post_id):
         raise PermissionDenied
 
 def gotopost(request, post_id):
+    prepare(request)
     try:
         p = Post.objects.get(pk=post_id)
-        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(p.topic.id) + "/#post-" + str(p.id))
+        count = Post.objects.filter(topic=p.topic).filter(post_date__lt=p.post_date).count() + 1
+        page = math.ceil(count / float(10))
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "topic/" + str(p.topic.id) + "/?page=" + str(page) + "#post-" + str(p.id))
     except Post.DoesNotExist:
         raise Http404("Post not found")
 
 def changepassword(request):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_authenticated():
             u = authenticate(username=request.user.username, password=request.POST['oldpass'])
@@ -338,6 +400,7 @@ def changepassword(request):
     return HttpResponse(template.render(context))
 
 def report(request, post_id):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_authenticated():
             r = Report(reporter=request.user.username, reported=Post.objects.get(pk=post_id), report_message=request.POST['message'], report_status="o", report_date=datetime.now())
@@ -359,6 +422,7 @@ def report(request, post_id):
     return HttpResponse(template.render(context))
 
 def renametopic(request, topic_id):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_authenticated():
             if request.user.is_staff:
@@ -385,6 +449,7 @@ def renametopic(request, topic_id):
         raise PermissionDenied
 
 def viewuser(request, username):
+    prepare(request)
     try:
         template = loader.get_template("viewuser.html")
         context = RequestContext(request, {
@@ -401,6 +466,7 @@ def viewuser(request, username):
         raise Http404("User not found")
 
 def banuser(request, username):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_authenticated() and request.user.is_staff:
             if request.POST['banned'] == "yes":
@@ -434,6 +500,7 @@ def banuser(request, username):
         raise PermissionDenied
 
 def banappeal(request):
+    prepare(request)
     if request.method == "POST":
         u = authenticate(username=request.POST['user'], password=request.POST['pass'])
         if u is not None:
@@ -460,6 +527,7 @@ def banappeal(request):
     return HttpResponse(template.render(context))
 
 def changerank(request, username):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_superuser:
             if request.POST['rank'] == "a":
@@ -494,6 +562,7 @@ def changerank(request, username):
         raise PermissionDenied
 
 def http404(request):
+    prepare(request)
     template = loader.get_template("404.html")
     context = RequestContext(request, {
         'auth': request.user.is_authenticated(),
@@ -503,6 +572,7 @@ def http404(request):
     return HttpResponse(template.render(context))
 
 def http403(request):
+    prepare(request)
     template = loader.get_template("403.html")
     context = RequestContext(request, {
         'auth': request.user.is_authenticated(),
@@ -512,9 +582,11 @@ def http403(request):
     return HttpResponse(template.render(context))
 
 def http500(request):
+    prepare(request)
     return HttpResponse("<h1>Internal Server Error - HTTP 500</h1>")
 
 def admin(request):
+    prepare(request)
     if not request.user.is_staff:
        raise PermissionDenied 
     
@@ -531,6 +603,7 @@ def admin(request):
         return render(request, "admin.html")
 
 def sticktopic(request, topic_id, stick_unstick):
+    prepare(request)
     if request.user.is_staff:
         if stick_unstick == "s":
             t = Topic.objects.get(pk=topic_id)
@@ -549,6 +622,7 @@ def sticktopic(request, topic_id, stick_unstick):
         raise PermissionDenied
 
 def deleteaccount(request):
+    prepare(request)
     if request.user.is_authenticated():
         if request.method == "POST":
             fu = ForumUser.objects.get(username=request.user.username)
@@ -571,6 +645,7 @@ def deleteaccount(request):
         raise PermissionDenied
 
 def accountdeleted(request):
+    prepare(request)
     logout(request)
     template = loader.get_template("accountdeleted.html")
     context = RequestContext(request, {
@@ -581,6 +656,7 @@ def accountdeleted(request):
     return HttpResponse(template.render(context))
 
 def admindelete(request, username):
+    prepare(request)
     if request.method == "POST" and request.user.is_superuser:
         User.objects.get(username=username).delete()
         messages.warning(request, "Account deleted!", fail_silently=True)
@@ -609,6 +685,7 @@ def postasjson(request, post_id):
     return HttpResponse(json2)
 
 def settingsdetails(request, username):
+    prepare(request)
     if request.method == "POST":
         if request.user.username == username or request.user.is_staff:
             f = ForumUser.objects.get(username=username)
@@ -634,6 +711,7 @@ def settingsdetails(request, username):
         raise PermissionDenied
 
 def messagesview(request):
+    prepare(request)
     template = loader.get_template("messages.html")
     context = RequestContext(request, {
         'user': request.user,
@@ -647,6 +725,7 @@ def messagesview(request):
         raise PermissionDenied
 
 def deletemsg(request, msg_id):
+    prepare(request)
     msg = Message.objects.get(pk=msg_id)
     if msg.admin_message:
         msg.removed = True
@@ -657,6 +736,7 @@ def deletemsg(request, msg_id):
     return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "messages/")
 
 def sendmsg(request, username):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_staff:
             msg = Message(removed=False, admin_message=True, content=request.POST['content'], user=User.objects.get(username=username), date=datetime.now())
@@ -678,6 +758,7 @@ def sendmsg(request, username):
         raise PermissionDenied
 
 def followunfollow(request, topic_id):
+    prepare(request)
     topic = topic_id
     if request.user.is_authenticated():
         try:
@@ -696,6 +777,7 @@ def followunfollow(request, topic_id):
         raise PermissionDenied
 
 def adminmessages(request, username):
+    prepare(request)
     if request.user.is_staff:
         template = loader.get_template("reviewadminmessages.html")
         context = RequestContext(request, {
@@ -709,6 +791,7 @@ def adminmessages(request, username):
         raise PermissionDenied
 
 def deleteadminmsg(request, username, mid):
+    prepare(request)
     if request.user.is_staff:
         m = Message.objects.get(pk=mid)
         m.delete()
@@ -720,17 +803,38 @@ def deleteadminmsg(request, username, mid):
 def viewposts(request, username):
     # Links to this page are not shown to normal users but normal users can
     # see this page
+    prepare(request)
+    posts = Post.objects.filter(poster=username).order_by('-post_date')
+    posts2 = Paginator(posts, 20)
+    try:
+        if not 'page' in request.GET:
+            pagenum = 1
+        else:
+            pagenum = request.GET['page']
+        page = posts2.page(pagenum)
+    except InvalidPage:
+        pagenum = 1
+        page = posts2.page(pagenum)
+        messages.error(request, "Requested page not found", fail_silently=True)
     template = loader.get_template("viewpostlist.html")
     context = RequestContext(request, {
         'user': request.user,
         'auth': request.user.is_authenticated(),
         'forumsettings': FORUM_SETTINGS,
-        'posts': Post.objects.filter(poster=username).order_by('-post_date'),
+        'posts': page.object_list,
+        'range': posts2.page_range,
+        'hasnextpage': page.has_next(),
+        'hasprevpage': page.has_previous(),
+        'nextpage': int(pagenum) + 1,
+        'prevpage': int(pagenum) - 1,
+        'currentpage': int(pagenum),
+        'username': username,
     })
     messages.info(request, "Post count: " + str(Post.objects.filter(poster=username).count()), fail_silently=True)
     return HttpResponse(template.render(context))
 
 def install(request):
+    prepare(request)
     if not User.objects.count() == 0:
         raise Http404("Already installed!")
     if request.method == "POST":
@@ -751,6 +855,7 @@ def install(request):
     return HttpResponse(template.render(context))
 
 def installComplete(request):
+    prepare(request)
     template = loader.get_template("installed.html")
     context = RequestContext(request, {
         'user': request.user,
@@ -760,11 +865,19 @@ def installComplete(request):
     return HttpResponse(template.render(context))
 
 def deletealluserposts(request, username):
+    prepare(request)
     if request.method == "POST":
         if request.user.is_staff or request.user.is_superuser:
-            p = Post.objects.filter(poster=username)
-            for post in p:
-                post.delete()
+            if not request.POST['action'] == "Delete all posts and leave place holder":
+                p = Post.objects.filter(poster=username)
+                for post in p:
+                    post.delete()
+            else:
+                p = Post.objects.filter(poster=username)
+                for post in p:
+                    post.content = "[i]Post deleted[/i]"
+                    post.rank = "d"
+                    post.save()
             messages.success(request, 'All posts have been deleted', fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'])
         else:

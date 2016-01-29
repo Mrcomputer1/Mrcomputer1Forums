@@ -10,9 +10,8 @@
 		<link rel="stylesheet" href="https://cdn.wysibb.com/css/default/wbbtheme.css" />
 		<script src='{% static "Mrcomputer1Forums/Topic_Script.js" %}'></script>
 		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/User_Style.css" %}'>
-		<script src='{% static "Mrcomputer1Forums/Scratch$.js" %}'></script>
-		<script src='{% static "Mrcomputer1Forums/User_ScratchR2_Verify.js" %}'></script>
 		<link rel="stylesheet" href='{% static "Mrcomputer1Forums/Alert_Style.css" %}'>
+		<link rel='stylesheet' href='{% static "Mrcomputer1Forums/Forum_Index_Style.css" %}'>
 	</head>
 	<body>
 <header class="header">
@@ -20,7 +19,11 @@
 	<a href="{{ forumsettings.FORUM_ROOT }}" class="headeritem">{{ forumsettings.FORUM_NAME }}</a>
 	<a href="{{ forumsettings.FORUM_ROOT }}user/{{ user.username }}"><span class="headerselecteditem">Welcome, {{ user.username }}!</span></a>
 	<a href="{{ forumsettings.FORUM_ROOT }}account/change_password/" class="headeritem">Change your password</a>
-	<a href="{{ forumsettings.FORUM_ROOT }}messages/" class="headeritem">Your messages</a>
+	{% if forumsettings.MSG_COUNT_ == 0 %}
+		<a href="{{ forumsettings.FORUM_ROOT }}messages/" class="headeritem">Your messages ({{ forumsettings.MSG_COUNT_ }})</a>
+	{% else %}
+		<a href="{{ forumsettings.FORUM_ROOT}}messages/" class="headeritem"><font color='yellow'><b>Your messages ({{ forumsettings.MSG_COUNT_}})</b></font></a>
+	{% endif %}
 	{% if user.is_staff %}
 	<a href="{{ forumsettings.SITE_ADMIN }}Forum/report/" class="headermoditem">View reports</a>
 	{% endif %}

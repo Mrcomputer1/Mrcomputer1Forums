@@ -6,6 +6,7 @@
 var run = 10;
 setTimeout(function(){
 	$("#postdeletebox").removeAttr("disabled");
+	$("#postdeletebox2").removeAttr("disabled");
 }, 10000);
 var i = setInterval(function(){
 	run = run - 1;
@@ -23,5 +24,5 @@ var i = setInterval(function(){
 <form action='' method='post'>
 {% csrf_token %}
 <font color='red'>You must wait <span id='seconds'>10</span> more second<span id='s'>s</span> until you can delete posts</font><br>
-<input type='submit' value='Delete all posts' id='postdeletebox' disabled>
+<input type='submit' value='Delete all posts' id='postdeletebox' name='action' disabled> <input type='submit' value='Delete all posts and leave place holder' id='postdeletebox2' name='action' disabled>
 </form>

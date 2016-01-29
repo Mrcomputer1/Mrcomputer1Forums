@@ -1,6 +1,24 @@
 {% include "header.html" %}
 {% load bbcode %}
 
+{% if hasprevpage %}
+	<a href='{{ forumsettings.FORUM_ROOT }}user/{{ username }}/view_posts/?page={{ prevpage }}'>&lt;&lt;</a> 
+{% else %}
+	&lt;&lt;
+{% endif %}
+{% for page in range %}
+	{% if page == currentpage %}
+		{{ page }} 
+	{% else %}
+		<a href='{{ forumsettings.FORUM_ROOT }}user/{{ username }}/view_posts/?page={{ page }}'>{{ page }}</a>
+	{% endif %}
+{% endfor %}
+{% if hasnextpage %}
+	<a href='{{ forumsettings.FORUM_ROOT }}user/{{ username }}/view_posts/?page={{ nextpage }}'>&gt;&gt;</a>
+{% else %}
+	&gt;&gt;
+{% endif %}
+
 {% for post in posts %}
 	{% if post.rank == "a" or post.rank == "m" %}
 		<div class="post-header-admin" id="post-{{ post.id }}">
@@ -41,5 +59,23 @@
 	</div>
 	<br><br>
 {% endfor %}
+
+{% if hasprevpage %}
+	<a href='{{ forumsettings.FORUM_ROOT }}user/{{ username }}/view_posts/?page={{ prevpage }}'>&lt;&lt;</a> 
+{% else %}
+	&lt;&lt;
+{% endif %}
+{% for page in range %}
+	{% if page == currentpage %}
+		{{ page }} 
+	{% else %}
+		<a href='{{ forumsettings.FORUM_ROOT }}user/{{ username }}/view_posts/?page={{ page }}'>{{ page }}</a>
+	{% endif %}
+{% endfor %}
+{% if hasnextpage %}
+	<a href='{{ forumsettings.FORUM_ROOT }}user/{{ username }}/view_posts/?page={{ nextpage }}'>&gt;&gt;</a>
+{% else %}
+	&gt;&gt;
+{% endif %}
 
 {% include "footer.html" %}
