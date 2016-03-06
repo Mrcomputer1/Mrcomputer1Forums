@@ -4,6 +4,7 @@ This is my forum system
 ## Works on
 Version | Django version | Python version | Operating System
 ------- | -------------- | -------------- | ----------------
+1.7     | 1.8.2          | 3.4.3          | Windows 10
 1.6     | 1.8.2          | 3.4.3          | Windows 10
 1.5     | 1.8.2          | 3.4.3          | Windows 10
         | 1.9.1          |                |
@@ -20,7 +21,8 @@ Version | Django version | Python version | Operating System
 
 Version | Released             | Supported | Supported until | Notes
 ------- | -------------------- | --------- | --------------- | -------------------------
-1.6     | 29 Jan 2016          | YES       | -               | Newest release no support date set until no longer newest
+1.7     | 6 Mar 2016           | YES       | -               | Newest release no support date set until no longer newest
+1.6     | 29 Jan 2016          | HELP ONLY | 29 Jan 2017     | 
 1.5     | 10 Jan 2016          | HELP ONLY | 10 Jan 2017     | 
 1.4     | 4 Jan 2016           | HELP ONLY | 4 Jan 2017      | 
 1.3     | 19 Dec 2015          | HELP ONLY | 19 Dec 2016     | 
