@@ -25,10 +25,10 @@
 		<a href="{{ forumsettings.FORUM_ROOT}}messages/" class="headeritem"><font color='yellow'><b>Your messages ({{ forumsettings.MSG_COUNT_}})</b></font></a>
 	{% endif %}
 	{% if user.is_staff %}
-	<a href="{{ forumsettings.SITE_ADMIN }}Forum/report/" class="headermoditem">View reports</a>
+	<a href="{{ forumsettings.FORUM_ROOT }}_admin/reports" class="headermoditem">View reports</a>
 	{% endif %}
 	{% if user.is_superuser %}
-	<a href="{{ forumsettings.SITE_ADMIN }}" class="headeradminitem">View admin</a>
+	<a href="{{ forumsettings.FORUM_ROOT }}_admin" class="headeradminitem">View admin</a>
 	{% endif %}
 	<a href="{{ forumsettings.FORUM_ROOT }}account/logout/" class="headeritem">Logout</a>
 {% else %}

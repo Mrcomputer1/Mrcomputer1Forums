@@ -13,11 +13,14 @@ from .forum_settings import *
 import json, hashlib, math
 from django.utils import timezone
 
-def prepare(request):
+def prepare(request, is_admin_page=False):
     if request.user.is_authenticated():
-        FORUM_SETTINGS['MSG_COUNT_'] = Message.objects.filter(user=request.user).count()
+        FORUM_SETTINGS['MSG_COUNT_'] = Message.objects.filter(user=request.user).filter(removed=False).count()
     else:
         FORUM_SETTINGS['MSG_COUNT_'] = -1
+
+    if request.user.is_staff or request.user.is_superuser and not Report.objects.filter(report_status='o').count() == 0 and not Report.objects.filter(report_status='r').count() == 0:
+        messages.warning(request, "There are new reports", fail_silently=True)
 # Create your views here.
 def forumlist(request):
     prepare(request)
@@ -405,7 +408,7 @@ def report(request, post_id):
         if request.user.is_authenticated():
             r = Report(reporter=request.user.username, reported=Post.objects.get(pk=post_id), report_message=request.POST['message'], report_status="o", report_date=datetime.now())
             r.save()
-            message.success(request, "Post reported! Thanks for the report", fail_silently=True)
+            messages.success(request, "Post reported! Thanks for the report", fail_silently=True)
             return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "post/" + str(post_id) + "/")
         else:
             raise PermissionDenied
@@ -585,22 +588,22 @@ def http500(request):
     prepare(request)
     return HttpResponse("<h1>Internal Server Error - HTTP 500</h1>")
 
-def admin(request):
-    prepare(request)
-    if not request.user.is_staff:
-       raise PermissionDenied 
-    
-    if request.GET['task'] == 'sidebar':
-        template = loader.get_template("admin/sidebar.html")
-        context = RequestContext(request, {
-            'user': request.user,
-            'forumsettings': FORUM_SETTINGS,
-        })
-        return HttpResponse(template.render(context))
-    elif request.GET['task'] == 'adminblank':
-        return HttpResponse("<h1>Select an area</h1>")
-    else:
-        return render(request, "admin.html")
+#def admin(request):
+#    prepare(request)
+#    if not request.user.is_staff:
+#       raise PermissionDenied 
+#    
+#    if request.GET['task'] == 'sidebar':
+#        template = loader.get_template("admin/sidebar.html")
+#        context = RequestContext(request, {
+#            'user': request.user,
+#            'forumsettings': FORUM_SETTINGS,
+#        })
+#        return HttpResponse(template.render(context))
+#    elif request.GET['task'] == 'adminblank':
+#        return HttpResponse("<h1>Select an area</h1>")
+#    else:
+#        return render(request, "admin.html")
 
 def sticktopic(request, topic_id, stick_unstick):
     prepare(request)
@@ -894,3 +897,256 @@ def deletealluserposts(request, username):
             return HttpResponse(template.render(context))
         else:
             raise PermissionDenied
+
+def regenpostranks(request, username):
+    if request.user.is_staff or request.user.is_superuser:
+        for post in Post.objects.filter(poster=username):
+            user = User.objects.get(username=username)
+            if user.is_superuser:
+                post.rank = "a"
+            elif user.is_staff:
+                post.rank = "m"
+            else:
+                post.rank = "u"
+            post.save()
+        messages.success(request, "Refreshed post ranks", fail_silently=True)
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "user/" + username)
+    else:
+        raise PermissionDenied
+
+###
+#:ADMIN
+###
+
+def admin_home(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_staff:
+        raise PermissionDenied
+    template = loader.get_template("_admin/home.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'open_reports': Report.objects.filter(report_status="o").count(),
+        'review_reports': Report.objects.filter(report_status="r").count(),
+        'closed_reports': Report.objects.filter(report_status="c").count(),
+        'reports': Report.objects.count(),
+        'topics': Topic.objects.count(),
+        'posts': Post.objects.count(),
+        'users': ForumUser.objects.count(),
+    })
+    return HttpResponse(template.render(context))
+
+def admin_forumlist(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    template = loader.get_template("_admin/forums.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'sections': Section.objects.order_by("location"),
+        'forums': Forum.objects.order_by("location"),
+    })
+    return HttpResponse(template.render(context))
+
+def admin_sectionmanage(request, section):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    saved = False
+    if request.method == "POST":
+        sectionobj2 = Section.objects.get(pk=section)
+        sectionobj2.name = request.POST['section_name']
+        sectionobj2.location = request.POST['section_location']
+        sectionobj2.save()
+        saved = True
+    sectionobj = Section.objects.get(pk=section)
+    template = loader.get_template("_admin/sectionmanage.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'section': sectionobj,
+        'is_creating': False,
+        'is_saved': saved
+    })
+    return HttpResponse(template.render(context))
+
+def admin_sectioncreate(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    saved = False
+    if request.method == "POST":
+        sectionobj2 = Section(name=request.POST['section_name'], location=int(request.POST['section_location']))
+        sectionobj2.save()
+        saved = True
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "_admin")
+    template = loader.get_template("_admin/sectionmanage.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'is_creating': True,
+        'is_saved': saved
+    })
+    return HttpResponse(template.render(context))
+
+def admin_section_delete(request, section):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    deleted = False
+    if request.method == "POST":
+        if request.POST['delete'] == "Delete":
+            Section.objects.get(pk=section).delete()
+            deleted = True
+    template = loader.get_template("_admin/confirm_section_delete.html")
+    if not deleted:
+        context = RequestContext(request, {
+            'deleted': False,
+            'section': Section.objects.get(pk=section),
+            'forumsettings': FORUM_SETTINGS,
+            'user': request.user,
+            'auth': request.user.is_authenticated()
+        })
+    else:
+        context = RequestContext(request, {
+            'deleted': True,
+            'forumsettings': FORUM_SETTINGS,
+            'user': request.user,
+            'auth': request.user.is_authenticated()
+        })
+    return HttpResponse(template.render(context))
+
+def admin_forummanage(request, forum):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    saved = False
+    if request.method == "POST":
+        forum_ = Forum.objects.get(pk=forum)
+        forum_.name = request.POST['name']
+        forum_.location = int(request.POST['location'])
+        forum_.info = request.POST['info']
+        forum_.save()
+        saved = True
+    template = loader.get_template("_admin/forummanage.html")
+    context = RequestContext(request, {
+        'forum': Forum.objects.get(pk=forum),
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'is_saved': saved,
+        'is_creating': False
+    })
+    return HttpResponse(template.render(context))
+
+def admin_forumcreate(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    saved = False
+    if request.method == "POST":
+        forum = Forum(name=request.POST['name'], location = int(request.POST['location']), info = request.POST['info'], section=Section.objects.get(pk=request.GET['section']), latest_post_id=0, latest_poster='')
+        forum.save()
+        saved = True
+        return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "_admin")
+    template = loader.get_template("_admin/forummanage.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS,
+        'is_creating': True,
+        'is_saved': saved,
+        'sectionid': request.GET['section']
+    })
+    return HttpResponse(template.render(context))
+
+def admin_forum_delete(request, forumid):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    deleted = False
+    if request.method == "POST":
+        if request.POST['delete'] == "Delete":
+            Forum.objects.get(pk=forumid).delete()
+            deleted = True
+    template = loader.get_template("_admin/confirm_forum_delete.html")
+    if not deleted:
+        context = RequestContext(request, {
+            'deleted': False,
+            'forum': Forum.objects.get(pk=forumid),
+            'forumsettings': FORUM_SETTINGS,
+            'user': request.user,
+            'auth': request.user.is_authenticated()
+        })
+    else:
+        context = RequestContext(request, {
+            'deleted': True,
+            'forumsettings': FORUM_SETTINGS,
+            'user': request.user,
+            'auth': request.user.is_authenticated()
+        })
+    return HttpResponse(template.render(context))
+
+def admin_reports(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_staff:
+        raise PermissionDenied
+    template = loader.get_template("_admin/reports.html")
+    context = RequestContext(request, {
+        "reviewreports": Report.objects.filter(report_status="r"),
+        "openreports": Report.objects.filter(report_status="o"),
+        "forumsettings": FORUM_SETTINGS,
+        "user": request.user,
+        "auth": request.user.is_authenticated()
+    })
+    return HttpResponse(template.render(context))
+
+def admin_report_review(request, report):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_staff:
+        raise PermissionDenied
+    reportobj = Report.objects.get(pk=report)
+    reportobj.report_status = "r"
+    reportobj.save()
+    return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "_admin/reports")
+
+def admin_report_close(request, report):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_staff:
+        raise PermissionDenied
+    reportobj = Report.objects.get(pk=report)
+    reportobj.report_status = "c"
+    reportobj.save()
+    return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "_admin/reports")
+
+def admin_tools(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_staff:
+        raise PermissionDenied
+    template = loader.get_template("_admin/tools.html")
+    context = RequestContext(request, {
+        'user': request.user,
+        'auth': request.user.is_authenticated(),
+        'forumsettings': FORUM_SETTINGS
+    })
+    return HttpResponse(template.render(context))
+
+def admin_tools_refresh_post_ranks(request):
+    prepare(request, is_admin_page=True)
+    if not request.user.is_staff:
+        raise PermissionDenied
+    for post in Post.objects.all():
+        user = User.objects.get(username=post.poster)
+        if user.is_superuser:
+            post.rank = "a"
+        elif user.is_staff:
+            post.rank = "m"
+        else:
+            post.rank = "u"
+        post.save()
+    return redirect(FORUM_SETTINGS['FORUM_ROOT'] + "_admin/tools")

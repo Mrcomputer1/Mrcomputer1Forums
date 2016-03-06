@@ -48,8 +48,8 @@ urlpatterns = [
     url(r'topic/(?P<topic_id>[0-9]+)/rename_topic/$', views.renametopic, name='renametopic'),
     # /user/*/rank_change/
     url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/rank_change/$', views.changerank, name='changerank'),   
-    # /_admin/
-    url(r'^_admin/$', views.admin, name='admin'),
+    ## /_admin/
+    #url(r'^_admin/$', views.admin, name='admin'),
     # /topic/#/stick_unstick/[s,u]/
     url(r'^topic/(?P<topic_id>[0-9]+)/stick_unstick/(?P<stick_unstick>[su])/$', views.sticktopic, name='stickunstick'),
     # /account/delete_account/
@@ -86,10 +86,41 @@ urlpatterns = [
     url(r'^install/$', views.install),
     # /install/complete/
     url(r'^install/complete/', views.installComplete),
+    # /user/*/regen_post_ranks/
+    url(r'^user/(?P<username>[a-zA-Z0-9\-_]+)/regen_post_ranks/$', views.regenpostranks),
     
-    ####################
-    ##### API      #####
-    ####################
+    # :::ADMIN:::
+    
+    # /_admin
+    url(r'^_admin$', views.admin_home),
+    # /_admin/forums
+    url(r'^_admin/forums$', views.admin_forumlist),
+    # /_admin/section/#
+    url(r'^_admin/section/(?P<section>[0-9]+)$', views.admin_sectionmanage),
+    # /_admin/section
+    url(r'^_admin/section$', views.admin_sectioncreate),
+    # /_admin/section/#/delete
+    url(r'^_admin/section/(?P<section>[0-9]+)/delete$', views.admin_section_delete),
+    # /_admin/forum/#
+    url(r'^_admin/forum/(?P<forum>[0-9]+)$', views.admin_forummanage),
+    # /_admin/forum?section=#
+    url(r'^_admin/forum$', views.admin_forumcreate),
+    # /_admin/forum/#/delete
+    url(r'^_admin/forum/(?P<forumid>[0-9]+)/delete$', views.admin_forum_delete),
+    # /_admin/reports
+    url(r'^_admin/reports', views.admin_reports),
+    # /_admin/report/#/mark_review
+    url(r'^_admin/report/(?P<report>[0-9]+)/mark_review', views.admin_report_review),
+    # /_admin/report/#/close_report
+    url(r'^_admin/report/(?P<report>[0-9]+)/close_report', views.admin_report_close),
+    # /_admin/tools
+    url(r'^_admin/tools$', views.admin_tools),
+    # /_admin/tools/refresh_post_ranks
+    url(r'^_admin/tools/refresh_post_ranks', views.admin_tools_refresh_post_ranks),
+    
+    #####################
+    #####    API    #####
+    #####################
     #No Version
 
     # /api/ - API
