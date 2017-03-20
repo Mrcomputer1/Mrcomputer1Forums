@@ -7,7 +7,7 @@ Version | Django version | Python version | Operating System
 1.7     | 1.8.2          | 3.4.3          | Windows 10
 1.6     | 1.8.2          | 3.4.3          | Windows 10
 1.5     | 1.8.2          | 3.4.3          | Windows 10
-        | 1.9.1          |                |
+^       | 1.9.1          | ^              |
 1.4     | 1.8.2          | 3.4.3          | Windows 10
 1.3     | 1.8.2          | 3.4.3          | Windows 10
 1.2     | 1.8.2          | 3.4.3          | Windows 10
